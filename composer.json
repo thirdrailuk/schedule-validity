@@ -1,0 +1,46 @@
+{
+    "name": "third-rail-packages/schedule-validity",
+    "description": "Determine which Network Rail schedule applies for a date",
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "php": "^7.2"
+    },
+    "require-dev": {
+        "behat/behat": "^3.6",
+        "phpspec/phpspec": "^6.1",
+        "phpstan/phpstan": "^0.12.25",
+        "squizlabs/php_codesniffer": "^3.5",
+        "vimeo/psalm": "^3.11",
+        "webmozart/assert": "^1.8"
+    },
+    "autoload": {
+        "psr-4": {
+            "ThirdRailPackages\\ScheduleValidity\\": "src/ThirdRailPackages/ScheduleValidity"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Fake\\": "src/Fake"
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "bin-dir": "bin"
+    },
+    "scripts": {
+        "sniff": "bin/phpcs --colors --cache --standard=PSR2 -p -s -v src/",
+        "beauty": "bin/phpcbf --standard=PSR2 src/",
+        "stan": "bin/phpstan analyse src --level=max --ansi --verbose",
+        "psalm": "bin/psalm --no-cache --long-progress",
+        "spec": "bin/phpspec run --format=pretty --no-code-generation --stop-on-failure --ansi",
+        "behat": "bin/behat --format=pretty --stop-on-failure --colors --no-interaction",
+        "ci": [
+            "@sniff",
+            "@stan",
+            "@psalm",
+            "@spec",
+            "@behat"
+        ]
+    }
+}

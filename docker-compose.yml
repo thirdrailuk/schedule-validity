@@ -1,0 +1,11 @@
+version: '2'
+
+services:
+  console:
+    build:
+      context: ./docker/console
+    environment:
+      - PHP_IDE_CONFIG=serverName=third_rail_packages_schedule_validity
+    working_dir: /app
+    volumes:
+        - .:/app
