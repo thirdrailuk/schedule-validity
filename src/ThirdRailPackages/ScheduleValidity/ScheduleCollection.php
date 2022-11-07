@@ -19,19 +19,12 @@ class ScheduleCollection extends Collection
      */
     public function validate(Uid $uid, Date $date)
     {
-         $collection = $this
-             ->filterByUid($uid)
-             ->filterByApplicableDate($date)
-             ->filterByRunningDay($date)
-             ->sortBySTPIndicator();
-
-        $stp = $collection->rejectLTPSchedules();
-
-        if ($stp->count() > 0) {
-            return $stp->first();
-        }
-
-         return $collection->first();
+        return $this
+            ->filterByUid($uid)
+            ->filterByApplicableDate($date)
+            ->filterByRunningDay($date)
+            ->sortBySTPIndicator()
+            ->first();
     }
 
     /**
@@ -77,16 +70,6 @@ class ScheduleCollection extends Collection
             $applicableDay = strtolower($applicableDate->asDate()->format('l'));
 
             return ($scheduleDays->$applicableDay());
-        });
-    }
-
-    /**
-     * @return self
-     */
-    public function rejectLTPSchedules()
-    {
-        return $this->reject(function (Schedule $schedule) {
-            return $schedule->indicator()->asString() !== 'N';
         });
     }
 
