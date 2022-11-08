@@ -9,9 +9,8 @@
     "require-dev": {
         "behat/behat": "^3.6",
         "phpspec/phpspec": "^6.1",
-        "phpstan/phpstan": "^0.12.25",
+        "phpstan/phpstan": "^1.8",
         "squizlabs/php_codesniffer": "^3.5",
-        "vimeo/psalm": "^3.11",
         "webmozart/assert": "^1.8"
     },
     "autoload": {
@@ -26,19 +25,21 @@
     },
     "config": {
         "sort-packages": true,
-        "bin-dir": "bin"
+        "bin-dir": "bin",
+        "allow-plugins": {
+            "ocramius/package-versions": true,
+            "composer/package-versions-deprecated": true
+        }
     },
     "scripts": {
         "sniff": "bin/phpcs --colors --cache --standard=PSR2 -p -s -v src/",
         "beauty": "bin/phpcbf --standard=PSR2 src/",
         "stan": "bin/phpstan analyse src --level=max --ansi --verbose",
-        "psalm": "bin/psalm --no-cache --long-progress",
         "spec": "bin/phpspec run --format=pretty --no-code-generation --stop-on-failure --ansi",
         "behat": "bin/behat --format=pretty --stop-on-failure --colors --no-interaction",
         "ci": [
             "@sniff",
             "@stan",
-            "@psalm",
             "@spec",
             "@behat"
         ]

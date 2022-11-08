@@ -2,6 +2,11 @@
 
 namespace ThirdRailPackages\ScheduleValidity;
 
+/**
+ * @template TKey of array-key
+ *
+ * @extends Collection<TKey, Schedule>
+ */
 class ScheduleCollection extends Collection
 {
     public function add(Schedule $schedule): self
@@ -15,7 +20,7 @@ class ScheduleCollection extends Collection
      * @param Uid  $uid
      * @param Date $date
      *
-     * @return mixed
+     * @return ?Schedule
      */
     public function validate(Uid $uid, Date $date)
     {
@@ -64,7 +69,6 @@ class ScheduleCollection extends Collection
      */
     public function filterByRunningDay(Date $applicableDate)
     {
-        /** @psalm-suppress MissingClosureReturnType */
         return $this->filter(function (Schedule $schedule) use ($applicableDate) {
             $scheduleDays = $schedule->daysRuns();
             $applicableDay = strtolower($applicableDate->asDate()->format('l'));
@@ -73,33 +77,10 @@ class ScheduleCollection extends Collection
         });
     }
 
-    /**
-     * @return static
-     */
-    public function sortBySTPIndicator()
+    public function sortBySTPIndicator(): self
     {
-        $data = [];
-
-        $this->each(function (Schedule $schedule, int $index) use (&$data) {
-            /** @psalm-suppress all */
-            $data[$index] = $schedule->indicator()->asString();
-        });
-
-        /** @psalm-suppress all */
-        uasort($data, function ($a, $b) {
-            return ($a > $b);
-        });
-
-        $results = [];
-
-        /**
-         * @psalm-suppress all
-         */
-        foreach (array_keys($data) as $key) {
-            /** @psalm-suppress MixedAssignment */
-            $results[] = $this->items[$key];
-        }
-
-        return new static($results); // @phpstan-ignore-line
+        return $this->sort(function (Schedule $a, Schedule $b) {
+            return (int)($a->indicator()->asString() > $b->indicator()->asString());
+        })->values();
     }
 }
