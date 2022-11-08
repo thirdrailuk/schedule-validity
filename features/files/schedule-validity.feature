@@ -64,7 +64,7 @@ Feature: Validate applicable UID for a given date
     When Uid "A12345" is selected on "2013-01-09"
     Then Schedule "A12345" indicator "C" starting on "2013-01-09" should be applied
 
-  Scenario: STP overlays CAN, VAR and WTT
+  Scenario: STP overlays CAN, VAR
     Given the following schedules exist
       | uid    | indicator | start_date | end_date   | days_runs |
       | K33330 | C         | 2022-11-07 | 2022-11-07 | 1000000   |
