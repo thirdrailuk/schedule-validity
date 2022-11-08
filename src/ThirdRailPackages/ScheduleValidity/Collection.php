@@ -2,41 +2,52 @@
 
 namespace ThirdRailPackages\ScheduleValidity;
 
-class Collection implements \ArrayAccess, \Countable, \IteratorAggregate
+use ArrayAccess;
+use ArrayIterator;
+use Countable;
+use IteratorAggregate;
+
+/**
+ * @template TKey of array-key
+ * @template TValue
+ *
+ * @implements \ArrayAccess<TKey, TValue>
+ */
+class Collection implements ArrayAccess, Countable, IteratorAggregate
 {
     /**
-     * @var array
+     * @var array<TKey, TValue>
      */
     protected $items = [];
 
     /**
+     * @template TMakeKey of array-key
+     * @template TMakeValue
+     *
+     * @param array<TMakeKey, TMakeValue> $items
+     *
+     * @return static<TMakeKey, TMakeValue>
+     */
+    final public static function make($items = [])
+    {
+        return new static($items);
+    }
+
+    /**
      * Collection constructor.
      *
-     * @param array $items
+     * @param array<TKey, TValue> $items
      */
-    public function __construct($items = [])
+    final public function __construct($items = [])
     {
         $this->items = $items;
     }
 
     /**
-     * @param array $items
-     *
-     * @return static
-     */
-    public static function make($items = []): self
-    {
-        return new static($items); // @phpstan-ignore-line
-    }
-
-    /**
-     * @param callable $function
-     *
      * @return $this
      */
     public function each(callable $function)
     {
-        /** @psalm-suppress MixedAssignment */
         foreach ($this->items as $key => $item) {
             $function($item, $key);
         }
@@ -45,48 +56,75 @@ class Collection implements \ArrayAccess, \Countable, \IteratorAggregate
     }
 
     /**
-     * @param callable $function
+     * @param callable(TValue): mixed $function
      *
-     * @return static
+     * @return static<TKey, TValue>
      */
     public function map(callable $function): self
     {
-        return new static(array_map($function, $this->items)); // @phpstan-ignore-line
+        return new static(array_map($function, $this->items));
     }
 
     /**
-     * @param callable $function
+     * @param callable(TValue): bool $function
      *
      * @return static
      */
     public function filter(callable $function): self
     {
-        /** @psalm-suppress MixedArgumentTypeCoercion */
-        return new static(array_filter($this->items, $function)); // @phpstan-ignore-line
+        return new static(array_filter($this->items, $function));
     }
 
     /**
-     * @param callable $function
+     * @param callable(TValue): bool $function
      *
      * @return static
      */
     public function reject(callable $function): self
     {
-        /** @psalm-suppress MissingClosureParamType */
         return $this->filter(function ($item) use ($function) {
             return !$function($item);
         });
     }
 
     /**
-     * @return mixed
+     * @return null|TValue
+     *
+     * @phpstan-return TValue|null
      */
     public function first()
     {
-        /** @psalm-suppress MixedAssignment */
+        $item = null;
+
         foreach ($this->items as $item) {
-            return $item;
+            break;
         }
+
+        return $item;
+    }
+
+    /**
+     * @param callable(TValue, TValue): int $callback
+     *
+     * @return static
+     */
+    public function sort($callback = null): self
+    {
+        $items = $this->items;
+
+        $callback && is_callable($callback)
+            ? uasort($items, $callback)
+            : asort($items, SORT_REGULAR);
+
+        return new static($items);
+    }
+
+    /**
+     * @return static
+     */
+    public function values(): self
+    {
+        return new static(array_values($this->items));
     }
 
     /**
@@ -113,55 +151,49 @@ class Collection implements \ArrayAccess, \Countable, \IteratorAggregate
     }
 
     /**
-     * @return \ArrayIterator
+     * @return ArrayIterator
      */
     public function getIterator()
     {
-        return new \ArrayIterator($this->items);
+        return new ArrayIterator($this->items);
     }
 
     /**
-     * @param mixed $offset
-     *
-     * @return bool
+     * @param TKey $offset
      */
     public function offsetExists($offset): bool
     {
-        /** @psalm-suppress MixedArgument */
         return array_key_exists($offset, $this->items);
     }
 
     /**
-     * @param mixed $offset
+     * @param TKey $offset
      *
-     * @return mixed
+     * @return TValue
      */
     public function offsetGet($offset)
     {
-        /** @psalm-suppress MixedArrayOffset */
         return $this->items[$offset];
     }
 
     /**
-     * @param mixed $offset
-     * @param mixed $value
+     * @param null|TKey $offset
+     * @param TValue    $value
      */
     public function offsetSet($offset, $value): void
     {
         if ($offset === null) {
             $this->items[] = $value;
         } else {
-            /** @psalm-suppress MixedArrayOffset */
             $this->items[$offset] = $value;
         }
     }
 
     /**
-     * @param mixed $offset
+     * @param TKey $offset
      */
     public function offsetUnset($offset): void
     {
-        /** @psalm-suppress MixedArrayOffset */
         unset($this->items[$offset]);
     }
 }

@@ -1,6 +1,6 @@
 Feature: Validate applicable UID for a given date
 
-  Schedule and Association validities are between a start date and an end date on particular days of the week. They
+  Schedule and Association validates are between a start date and an end date on particular days of the week. They
   each have a Short Term Planning (STP) indicator field as follows:
 
   - C - Planned cancellation: the schedule does not apply on this date, and the train will not run. Typically seen on public holidays when an alternate schedule applies, or on Christmas Day.
@@ -62,4 +62,12 @@ Feature: Validate applicable UID for a given date
       | A12345 | O         | 2013-01-10 | 2013-01-10 | 0001000   |
       | A12345 | N         | 2013-01-09 | 2013-01-10 | 0011000   |
     When Uid "A12345" is selected on "2013-01-09"
-    Then Schedule "A12345" indicator "N" starting on "2013-01-09" should be applied
+    Then Schedule "A12345" indicator "C" starting on "2013-01-09" should be applied
+
+  Scenario: STP overlays CAN, VAR
+    Given the following schedules exist
+      | uid    | indicator | start_date | end_date   | days_runs |
+      | K33330 | C         | 2022-11-07 | 2022-11-07 | 1000000   |
+      | K33330 | N         | 2022-11-07 | 2022-11-07 | 1000000   |
+    When Uid "K33330" is selected on "2022-11-07"
+    Then Schedule "K33330" indicator "C" starting on "2022-11-07" should be applied

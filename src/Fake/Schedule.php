@@ -13,18 +13,22 @@ class Schedule implements \ThirdRailPackages\ScheduleValidity\Schedule
      * @var Uid
      */
     private $uid;
+
     /**
      * @var Indicator
      */
     private $indicator;
+
     /**
      * @var Date
      */
     private $startDate;
+
     /**
      * @var Date
      */
     private $endDate;
+
     /**
      * @var DaysRuns
      */
@@ -37,11 +41,11 @@ class Schedule implements \ThirdRailPackages\ScheduleValidity\Schedule
         Date $endDate,
         DaysRuns $daysRuns
     ) {
-        $this->uid = $uid;
+        $this->uid       = $uid;
         $this->indicator = $indicator;
         $this->startDate = $startDate;
-        $this->endDate = $endDate;
-        $this->daysRuns = $daysRuns;
+        $this->endDate   = $endDate;
+        $this->daysRuns  = $daysRuns;
     }
 
     public function uid(): Uid
