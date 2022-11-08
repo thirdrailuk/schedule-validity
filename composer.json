@@ -8,6 +8,7 @@
     },
     "require-dev": {
         "behat/behat": "^3.6",
+        "friendsofphp/php-cs-fixer": "^3.13",
         "phpspec/phpspec": "^6.1",
         "phpstan/phpstan": "^1.8",
         "squizlabs/php_codesniffer": "^3.5",
@@ -34,11 +35,14 @@
     "scripts": {
         "sniff": "bin/phpcs --colors --cache --standard=PSR2 -p -s -v src/",
         "beauty": "bin/phpcbf --standard=PSR2 src/",
+        "style": "@format --dry-run -v",
+        "format": "bin/php-cs-fixer fix --config=.php-cs-fixer.dist.php",
         "stan": "bin/phpstan analyse src --level=max --ansi --verbose",
         "spec": "bin/phpspec run --format=pretty --no-code-generation --stop-on-failure --ansi",
         "behat": "bin/behat --format=pretty --stop-on-failure --colors --no-interaction",
-        "ci": [
+        "test": [
             "@sniff",
+            "@style",
             "@stan",
             "@spec",
             "@behat"
