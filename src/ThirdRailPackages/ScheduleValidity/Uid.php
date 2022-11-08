@@ -2,6 +2,8 @@
 
 namespace ThirdRailPackages\ScheduleValidity;
 
+use InvalidArgumentException;
+
 final class Uid
 {
     /**
@@ -9,16 +11,16 @@ final class Uid
      */
     private $uid;
 
+    public static function fromString(string $uid): self
+    {
+        return new self($uid);
+    }
+
     private function __construct(string $uid)
     {
         $this->validateUid($uid);
 
         $this->uid = $uid;
-    }
-
-    public static function fromString(string $uid): self
-    {
-        return new self($uid);
     }
 
     public function asString(): string
@@ -29,7 +31,7 @@ final class Uid
     private function validateUid(string $uid): void
     {
         if (!preg_match("/^([A-Z]| )?\d{5}$/", $uid)) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 sprintf(
                     'Schedule UID "%s" is not a valid format',
                     $uid

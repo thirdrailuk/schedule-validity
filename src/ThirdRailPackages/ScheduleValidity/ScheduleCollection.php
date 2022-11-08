@@ -17,9 +17,6 @@ class ScheduleCollection extends Collection
     }
 
     /**
-     * @param Uid  $uid
-     * @param Date $date
-     *
      * @return ?Schedule
      */
     public function validate(Uid $uid, Date $date)
@@ -33,8 +30,6 @@ class ScheduleCollection extends Collection
     }
 
     /**
-     * @param Uid $uid
-     *
      * @return self
      */
     public function filterByUid(Uid $uid)
@@ -45,42 +40,37 @@ class ScheduleCollection extends Collection
     }
 
     /**
-     * @param Date $applicableDate
-     *
      * @return self
      */
     public function filterByApplicableDate(Date $applicableDate)
     {
         return $this->filter(function (Schedule $schedule) use ($applicableDate) {
             $startDate = $schedule->startDate();
-            $endDate = $schedule->endDate();
+            $endDate   = $schedule->endDate();
 
-             return (
+            return
                 $applicableDate->asTimestamp() >= $startDate->asTimestamp() &&
-                $applicableDate->asTimestamp() <= $endDate->asTimestamp()
-            );
+                $applicableDate->asTimestamp() <= $endDate->asTimestamp();
         });
     }
 
     /**
-     * @param Date $applicableDate
-     *
      * @return self
      */
     public function filterByRunningDay(Date $applicableDate)
     {
         return $this->filter(function (Schedule $schedule) use ($applicableDate) {
-            $scheduleDays = $schedule->daysRuns();
+            $scheduleDays  = $schedule->daysRuns();
             $applicableDay = strtolower($applicableDate->asDate()->format('l'));
 
-            return ($scheduleDays->$applicableDay());
+            return $scheduleDays->{$applicableDay}();
         });
     }
 
     public function sortBySTPIndicator(): self
     {
         return $this->sort(function (Schedule $a, Schedule $b) {
-            return (int)($a->indicator()->asString() > $b->indicator()->asString());
+            return (int) ($a->indicator()->asString() > $b->indicator()->asString());
         })->values();
     }
 }

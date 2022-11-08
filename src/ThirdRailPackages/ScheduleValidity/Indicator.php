@@ -2,6 +2,8 @@
 
 namespace ThirdRailPackages\ScheduleValidity;
 
+use InvalidArgumentException;
+
 final class Indicator
 {
     /**
@@ -9,16 +11,16 @@ final class Indicator
      */
     private $indicator;
 
+    public static function fromString(string $indicator): self
+    {
+        return new self($indicator);
+    }
+
     private function __construct(string $indicator)
     {
         $this->validate($indicator);
 
         $this->indicator = $indicator;
-    }
-
-    public static function fromString(string $indicator): self
-    {
-        return new self($indicator);
     }
 
     public function asString(): string
@@ -28,8 +30,8 @@ final class Indicator
 
     private function validate(string $indicator): void
     {
-        if (!in_array($indicator, ['C', 'O', 'N', 'P'])) {
-            throw new \InvalidArgumentException(
+        if (!in_array($indicator, ['C', 'O', 'N', 'P'], true)) {
+            throw new InvalidArgumentException(
                 sprintf(
                     'Indicator "%s" is not valid',
                     $indicator

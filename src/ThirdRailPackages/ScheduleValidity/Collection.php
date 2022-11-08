@@ -2,29 +2,23 @@
 
 namespace ThirdRailPackages\ScheduleValidity;
 
+use ArrayAccess;
+use ArrayIterator;
+use Countable;
+use IteratorAggregate;
+
 /**
  * @template TKey of array-key
  * @template TValue
  *
  * @implements \ArrayAccess<TKey, TValue>
  */
-class Collection implements \ArrayAccess, \Countable, \IteratorAggregate
+class Collection implements ArrayAccess, Countable, IteratorAggregate
 {
     /**
      * @var array<TKey, TValue>
      */
     protected $items = [];
-
-    /**
-     * Collection constructor.
-     *
-     * @param array<TKey, TValue> $items
-     * @return void
-     */
-    final public function __construct($items = [])
-    {
-        $this->items = $items;
-    }
 
     /**
      * @template TMakeKey of array-key
@@ -40,8 +34,16 @@ class Collection implements \ArrayAccess, \Countable, \IteratorAggregate
     }
 
     /**
-     * @param callable $function
+     * Collection constructor.
      *
+     * @param array<TKey, TValue> $items
+     */
+    final public function __construct($items = [])
+    {
+        $this->items = $items;
+    }
+
+    /**
      * @return $this
      */
     public function each(callable $function)
@@ -55,6 +57,7 @@ class Collection implements \ArrayAccess, \Countable, \IteratorAggregate
 
     /**
      * @param callable(TValue): mixed $function
+     *
      * @return static<TKey, TValue>
      */
     public function map(callable $function): self
@@ -64,6 +67,7 @@ class Collection implements \ArrayAccess, \Countable, \IteratorAggregate
 
     /**
      * @param callable(TValue): bool $function
+     *
      * @return static
      */
     public function filter(callable $function): self
@@ -84,7 +88,8 @@ class Collection implements \ArrayAccess, \Countable, \IteratorAggregate
     }
 
     /**
-     * @return TValue|null
+     * @return null|TValue
+     *
      * @phpstan-return TValue|null
      */
     public function first()
@@ -92,7 +97,7 @@ class Collection implements \ArrayAccess, \Countable, \IteratorAggregate
         $item = null;
 
         foreach ($this->items as $item) {
-             break;
+            break;
         }
 
         return $item;
@@ -146,17 +151,15 @@ class Collection implements \ArrayAccess, \Countable, \IteratorAggregate
     }
 
     /**
-     * @return \ArrayIterator
+     * @return ArrayIterator
      */
     public function getIterator()
     {
-        return new \ArrayIterator($this->items);
+        return new ArrayIterator($this->items);
     }
 
     /**
      * @param TKey $offset
-     *
-     * @return bool
      */
     public function offsetExists($offset): bool
     {
@@ -174,10 +177,8 @@ class Collection implements \ArrayAccess, \Countable, \IteratorAggregate
     }
 
     /**
-     * @param TKey|null $offset
+     * @param null|TKey $offset
      * @param TValue    $value
-     *
-     * @return void
      */
     public function offsetSet($offset, $value): void
     {
@@ -190,8 +191,6 @@ class Collection implements \ArrayAccess, \Countable, \IteratorAggregate
 
     /**
      * @param TKey $offset
-     *
-     * @return void
      */
     public function offsetUnset($offset): void
     {

@@ -2,17 +2,17 @@
 
 namespace ThirdRailPackages\ScheduleValidity;
 
+use DateTimeImmutable;
+use DateTimeInterface;
+use DateTimeZone;
+use Exception;
+
 final class Date
 {
     /**
-     * @var \DateTimeInterface
+     * @var DateTimeInterface
      */
     private $date;
-
-    private function __construct(\DateTimeInterface $date)
-    {
-        $this->date = $date;
-    }
 
     public static function fromString(string $date): self
     {
@@ -21,28 +21,12 @@ final class Date
         );
     }
 
-    private static function validate(string $date): \DateTimeInterface
+    private function __construct(DateTimeInterface $date)
     {
-        $datetime = \DateTimeImmutable::createFromFormat(
-            'Y-m-d',
-            $date,
-            new \DateTimeZone('Europe/London')
-        );
-
-        if (! $datetime instanceof \DateTimeInterface) {
-            throw new \Exception(
-                sprintf(
-                    '"%s" does not create %s',
-                    $date,
-                    \DateTimeInterface::class
-                )
-            );
-        }
-
-        return $datetime;
+        $this->date = $date;
     }
 
-    public function asDate(): \DateTimeInterface
+    public function asDate(): DateTimeInterface
     {
         return $this->date;
     }
@@ -55,5 +39,26 @@ final class Date
     public function asString(): string
     {
         return $this->date->format('Y-m-d');
+    }
+
+    private static function validate(string $date): DateTimeInterface
+    {
+        $datetime = DateTimeImmutable::createFromFormat(
+            'Y-m-d',
+            $date,
+            new DateTimeZone('Europe/London')
+        );
+
+        if (!$datetime instanceof DateTimeInterface) {
+            throw new Exception(
+                sprintf(
+                    '"%s" does not create %s',
+                    $date,
+                    DateTimeInterface::class
+                )
+            );
+        }
+
+        return $datetime;
     }
 }

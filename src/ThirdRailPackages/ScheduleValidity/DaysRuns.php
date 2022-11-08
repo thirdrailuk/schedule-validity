@@ -2,36 +2,63 @@
 
 namespace ThirdRailPackages\ScheduleValidity;
 
+use InvalidArgumentException;
+
 final class DaysRuns
 {
     /**
      * @var bool
      */
     private $monday;
+
     /**
      * @var bool
      */
     private $tuesday;
+
     /**
      * @var bool
      */
     private $wednesday;
+
     /**
      * @var bool
      */
     private $thursday;
+
     /**
      * @var bool
      */
     private $friday;
+
     /**
      * @var bool
      */
     private $saturday;
+
     /**
      * @var bool
      */
     private $sunday;
+
+    public static function fromDaysRuns(string $daysRuns): self
+    {
+        if (strlen($daysRuns) !== 7) {
+            throw new InvalidArgumentException(
+                sprintf(
+                    'Invalid Days Runs length "%s" passed',
+                    $daysRuns
+                )
+            );
+        }
+
+        return new self(...array_map(
+            function ($item) {
+                return (bool) $item;
+            },
+            str_split($daysRuns)
+        ));
+    }
 
     private function __construct(
         bool $monday,
@@ -42,32 +69,13 @@ final class DaysRuns
         bool $saturday,
         bool $sunday
     ) {
-        $this->monday = $monday;
-        $this->tuesday = $tuesday;
+        $this->monday    = $monday;
+        $this->tuesday   = $tuesday;
         $this->wednesday = $wednesday;
-        $this->thursday = $thursday;
-        $this->friday = $friday;
-        $this->saturday = $saturday;
-        $this->sunday = $sunday;
-    }
-
-    public static function fromDaysRuns(string $daysRuns): self
-    {
-        if (strlen($daysRuns) !== 7) {
-            throw new \InvalidArgumentException(
-                sprintf(
-                    'Invalid Days Runs length "%s" passed',
-                    $daysRuns
-                )
-            );
-        }
-
-        return new self(...array_map(
-            function ($item) {
-                return (bool)$item;
-            },
-            str_split($daysRuns)
-        ));
+        $this->thursday  = $thursday;
+        $this->friday    = $friday;
+        $this->saturday  = $saturday;
+        $this->sunday    = $sunday;
     }
 
     public function monday(): bool
