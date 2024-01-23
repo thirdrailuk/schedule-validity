@@ -2,22 +2,15 @@
 
 namespace ThirdRailPackages\ScheduleValidity;
 
+/**
+ * @template TKey of array-key
+ * @template TSchedule of Schedule
+ *
+ * @extends Collection<TKey, TSchedule>
+ */
 class ScheduleCollection extends Collection
 {
-    public function add(Schedule $schedule): self
-    {
-        $this->items[] = $schedule;
-
-        return $this;
-    }
-
-    /**
-     * @param Uid  $uid
-     * @param Date $date
-     *
-     * @return mixed
-     */
-    public function validate(Uid $uid, Date $date)
+    public function validate(Uid $uid, Date $date): ?Schedule
     {
          $collection = $this
              ->filterByUid($uid)
@@ -37,86 +30,79 @@ class ScheduleCollection extends Collection
     /**
      * @param Uid $uid
      *
-     * @return self
+     * @return ScheduleCollection<(int|string), Schedule>
      */
     public function filterByUid(Uid $uid)
     {
-        return $this->filter(function (Schedule $schedule) use ($uid) {
-            return $schedule->uid()->asString() === $uid->asString();
-        });
+        return new static(
+            $this->filter(function (Schedule $schedule) use ($uid) {
+                return $schedule->uid()->asString() === $uid->asString();
+            })->toArray()
+        );
     }
 
     /**
      * @param Date $applicableDate
      *
-     * @return self
+     * @return ScheduleCollection<(int|string), Schedule>
      */
     public function filterByApplicableDate(Date $applicableDate)
     {
-        return $this->filter(function (Schedule $schedule) use ($applicableDate) {
-            $startDate = $schedule->startDate();
-            $endDate = $schedule->endDate();
+        return new static(
+            $this->filter(function (Schedule $schedule) use ($applicableDate) {
+                $startDate = $schedule->startDate();
+                $endDate = $schedule->endDate();
 
-             return (
-                $applicableDate->asTimestamp() >= $startDate->asTimestamp() &&
-                $applicableDate->asTimestamp() <= $endDate->asTimestamp()
-            );
-        });
+                return $applicableDate->asTimestamp() >= $startDate->asTimestamp()
+                    && $applicableDate->asTimestamp() <= $endDate->asTimestamp();
+            })->toArray()
+        );
     }
 
     /**
      * @param Date $applicableDate
      *
-     * @return self
+     * @return ScheduleCollection<(int|string), Schedule>
      */
     public function filterByRunningDay(Date $applicableDate)
     {
-        /** @psalm-suppress MissingClosureReturnType */
-        return $this->filter(function (Schedule $schedule) use ($applicableDate) {
-            $scheduleDays = $schedule->daysRuns();
-            $applicableDay = strtolower($applicableDate->asDate()->format('l'));
+        return new static(
+            $this->filter(function (Schedule $schedule) use ($applicableDate) {
+                $scheduleDays = $schedule->daysRuns();
+                $applicableDay = strtolower($applicableDate->asDate()->format('l'));
 
-            return ($scheduleDays->$applicableDay());
-        });
+                return $scheduleDays->$applicableDay();
+            })->toArray()
+        );
     }
 
     /**
-     * @return self
+     * @return ScheduleCollection<(int|string), Schedule>
      */
     public function rejectLTPSchedules()
     {
-        return $this->reject(function (Schedule $schedule) {
-            return $schedule->indicator()->asString() !== 'N';
-        });
+        return new static(
+            $this->reject(function (Schedule $schedule) {
+                return $schedule->indicator()->asString() !== 'N';
+            })->toArray()
+        );
     }
 
     /**
-     * @return static
+     * @return ScheduleCollection<(int|string), Schedule>
      */
     public function sortBySTPIndicator()
     {
-        $data = [];
+        return new static(
+            $this->sort(function (Schedule $a, Schedule $b) {
+                $aStpIndicator = $a->indicator()->asString();
+                $bStpIndicator = $b->indicator()->asString();
+                if ($aStpIndicator === $bStpIndicator) {
+                    return 0;
+                }
 
-        $this->each(function (Schedule $schedule, int $index) use (&$data) {
-            /** @psalm-suppress all */
-            $data[$index] = $schedule->indicator()->asString();
-        });
-
-        /** @psalm-suppress all */
-        uasort($data, function ($a, $b) {
-            return ($a > $b);
-        });
-
-        $results = [];
-
-        /**
-         * @psalm-suppress all
-         */
-        foreach (array_keys($data) as $key) {
-            /** @psalm-suppress MixedAssignment */
-            $results[] = $this->items[$key];
-        }
-
-        return new static($results); // @phpstan-ignore-line
+                return ($aStpIndicator < $bStpIndicator) ? -1 : 1;
+            })->toArray()
+        );
     }
 }

@@ -2,41 +2,57 @@
 
 namespace ThirdRailPackages\ScheduleValidity;
 
+/**
+ * @template TKey of array-key
+ * @template TValue
+ *
+ * @implements \ArrayAccess<TKey, TValue>
+ * @implements \IteratorAggregate<TKey, TValue>
+ */
 class Collection implements \ArrayAccess, \Countable, \IteratorAggregate
 {
-    /**
-     * @var array
-     */
+    /** @var array<TKey, TValue> */
     protected $items = [];
 
     /**
-     * Collection constructor.
-     *
-     * @param array $items
+     * @param array<TKey, TValue> $items
      */
-    public function __construct($items = [])
+    final public function __construct($items = [])
     {
         $this->items = $items;
     }
 
     /**
-     * @param array $items
+     * @template TMakeKey of array-key
+     * @template TMakeValue
      *
-     * @return static
+     * @param array<TMakeKey, TMakeValue> $items
+     * @return Collection<TMakeKey, TMakeValue>
      */
-    public static function make($items = []): self
+    public static function make($items): self
     {
-        return new static($items); // @phpstan-ignore-line
+        return new static($items);
+    }
+
+    /**
+     *
+     * @param TValue|mixed $item
+     * @return Collection
+     */
+    public function add($item)
+    {
+        $this->items[] = $item;
+
+        return $this;
     }
 
     /**
      * @param callable $function
      *
-     * @return $this
+     * @return Collection
      */
     public function each(callable $function)
     {
-        /** @psalm-suppress MixedAssignment */
         foreach ($this->items as $key => $item) {
             $function($item, $key);
         }
@@ -45,48 +61,68 @@ class Collection implements \ArrayAccess, \Countable, \IteratorAggregate
     }
 
     /**
-     * @param callable $function
+     * @template TMapValue
      *
-     * @return static
+     * @param  callable(TValue): TMapValue $function
+     * @return self<TKey, TMapValue>
      */
-    public function map(callable $function): self
+    public function map(callable $function)
     {
-        return new static(array_map($function, $this->items)); // @phpstan-ignore-line
+        return new self(array_map($function, $this->items));
     }
 
     /**
-     * @param callable $function
-     *
-     * @return static
+     * @param (callable(TValue): bool)|null $function
+     * @return self
      */
-    public function filter(callable $function): self
+    public function filter(callable $function = null): self
     {
-        /** @psalm-suppress MixedArgumentTypeCoercion */
-        return new static(array_filter($this->items, $function)); // @phpstan-ignore-line
+        if ($function !== null) {
+            return new self(array_filter($this->items, $function));
+        }
+
+        return new self(array_filter($this->items));
     }
 
     /**
-     * @param callable $function
-     *
-     * @return static
+     * @param callable(TValue): bool $function
+     * @return self
      */
     public function reject(callable $function): self
     {
-        /** @psalm-suppress MissingClosureParamType */
         return $this->filter(function ($item) use ($function) {
             return !$function($item);
         });
     }
 
     /**
-     * @return mixed
+     * Sort through each item with a callback.
+     *
+     * @param  (callable(TValue, TValue): int)|null|int  $callback
+     * @return self
+     */
+    public function sort($callback = null)
+    {
+        $items = $this->items;
+
+        $callback !== null && is_callable($callback)
+            ? uasort($items, $callback)
+            : asort($items, $callback ?? SORT_REGULAR);
+
+        return new self($items);
+    }
+
+
+    /**
+     * @return TValue|null
      */
     public function first()
     {
-        /** @psalm-suppress MixedAssignment */
         foreach ($this->items as $item) {
             return $item;
         }
+
+        return null;
     }
 
     /**
@@ -102,6 +138,16 @@ class Collection implements \ArrayAccess, \Countable, \IteratorAggregate
         return iterator_to_array($this);
     }
 
+    /**
+     * Reset the keys on the underlying array.
+     *
+     * @return Collection<int, mixed>
+     */
+    public function values()
+    {
+        return new self(array_values($this->items));
+    }
+
     public function count(): int
     {
         return count($this->items);
@@ -113,55 +159,44 @@ class Collection implements \ArrayAccess, \Countable, \IteratorAggregate
     }
 
     /**
-     * @return \ArrayIterator
+     * @return \ArrayIterator<TKey, TValue>
      */
-    public function getIterator()
+    public function getIterator(): \Traversable
     {
         return new \ArrayIterator($this->items);
     }
 
     /**
-     * @param mixed $offset
-     *
-     * @return bool
+     * @param TKey $offset
      */
     public function offsetExists($offset): bool
     {
-        /** @psalm-suppress MixedArgument */
         return array_key_exists($offset, $this->items);
     }
 
     /**
-     * @param mixed $offset
-     *
-     * @return mixed
+     * @param  TKey  $offset
+     * @return TValue
      */
-    public function offsetGet($offset)
+    public function offsetGet($offset): mixed
     {
-        /** @psalm-suppress MixedArrayOffset */
         return $this->items[$offset];
     }
 
     /**
-     * @param mixed $offset
-     * @param mixed $value
+     * @param TKey $offset
+     * @param TValue    $value
      */
     public function offsetSet($offset, $value): void
     {
-        if ($offset === null) {
-            $this->items[] = $value;
-        } else {
-            /** @psalm-suppress MixedArrayOffset */
-            $this->items[$offset] = $value;
-        }
+        $this->items[$offset] = $value;
     }
 
     /**
-     * @param mixed $offset
+     * @param TKey $offset
      */
     public function offsetUnset($offset): void
     {
-        /** @psalm-suppress MixedArrayOffset */
         unset($this->items[$offset]);
     }
 }

@@ -91,6 +91,7 @@ class ScheduleCollectionSpec extends ObjectBehavior
         $this->beConstructedWith([$wtt, $can, $var]);
 
         $this->sortBySTPIndicator()
+            ->values()
             ->toArray()
             ->shouldBe([$can, $var, $wtt]);
     }
