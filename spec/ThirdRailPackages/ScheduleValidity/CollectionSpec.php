@@ -163,4 +163,11 @@ class CollectionSpec extends ObjectBehavior
 
         $this->isEmpty()->shouldBe(true);
     }
+
+    function it_can_sort_items()
+    {
+        $this->beConstructedWith(['C', 'V', 'A', 'M']);
+
+        $this->sort()->values()->toArray()->shouldBeLike(['A', 'C', 'M', 'V']);
+    }
 }

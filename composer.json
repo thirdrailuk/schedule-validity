@@ -4,15 +4,15 @@
     "type": "library",
     "license": "MIT",
     "require": {
-        "php": "^7.2"
+        "php": "^8.1"
     },
     "require-dev": {
-        "behat/behat": "^3.6",
-        "phpspec/phpspec": "^6.1",
-        "phpstan/phpstan": "^0.12.25",
-        "squizlabs/php_codesniffer": "^3.5",
-        "vimeo/psalm": "^3.11",
-        "webmozart/assert": "^1.8"
+        "behat/behat": "^3.14",
+        "phpspec/phpspec": "^7.5",
+        "phpstan/phpstan": "^1.10",
+        "rector/rector": "^0.19",
+        "squizlabs/php_codesniffer": "^3.8",
+        "webmozart/assert": "^1.9"
     },
     "autoload": {
         "psr-4": {
@@ -26,19 +26,20 @@
     },
     "config": {
         "sort-packages": true,
-        "bin-dir": "bin"
+        "bin-dir": "bin",
+        "allow-plugins": {
+            "composer/package-versions-deprecated": true
+        }
     },
     "scripts": {
         "sniff": "bin/phpcs --colors --cache --standard=PSR2 -p -s -v src/",
         "beauty": "bin/phpcbf --standard=PSR2 src/",
         "stan": "bin/phpstan analyse src --level=max --ansi --verbose",
-        "psalm": "bin/psalm --no-cache --long-progress",
         "spec": "bin/phpspec run --format=pretty --no-code-generation --stop-on-failure --ansi",
         "behat": "bin/behat --format=pretty --stop-on-failure --colors --no-interaction",
-        "ci": [
+        "test": [
             "@sniff",
             "@stan",
-            "@psalm",
             "@spec",
             "@behat"
         ]
